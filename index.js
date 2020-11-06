@@ -137,7 +137,7 @@ app.get("/visit",function(req,res){
                 var temp={'action':'see-you'}
                 res.end(JSON.stringify(temp))
 
-                con.query(`select timeIn from currentlyIn where rollNo='${rollNo}' and placeId='${placeid}'`, function (err, result) {
+                con.query(`delete from currentlyIn where rollNo='${rollNo}' and placeId='${placeid}'`, function (err, result) {
                     if (err){
                         console.log("connection failed"+err.stack)       
                     }
