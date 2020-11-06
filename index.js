@@ -149,7 +149,7 @@ app.get("/visit",function(req,res){
             }
 
 
-            con.query(sql, function (err, result) {
+            con.query(insql, function (err, result) {
                 if (err) {
                     console.log("connection failed"+err.stack)
                     
