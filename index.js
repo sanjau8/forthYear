@@ -2,6 +2,11 @@ const mysql=require("mysql")
 const express = require('express');
 const app = express()
 
+process.on('uncaughtException', function (err) {
+    console.error(err);
+    console.log("Node NOT Exiting...");
+  });
+
 const con=mysql.createConnection({
     host:"crowd.ciiyzqthmod9.us-east-1.rds.amazonaws.com",
     user:"admin",
@@ -89,6 +94,11 @@ app.get("/login",function(req,res){
         res.end(JSON.stringify(temp))
             }
         else{
+            if(result.length==0){
+                let temp={'action':'wrong-user'}
+                res.end(JSON.stringify(temp))   
+            }
+            else{
             var actPass=result[0]['passwordd']
             if(pass==actPass){
             let temp=result[0]
@@ -97,9 +107,10 @@ app.get("/login",function(req,res){
             res.end(JSON.stringify(temp))
             }
             else{
-                let temp={'action':'wrong-user'}
+                let temp={'action':'wrong-password'}
                 res.end(JSON.stringify(temp))   
             }
+        }
             }
               
         
