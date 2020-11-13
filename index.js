@@ -207,6 +207,34 @@ app.get("/curByPlace",function(req,res){
     
 })
 
+app.get("/itemInsert",function(req,res){
+
+    const query=req.query
+    var place=query.place
+    var type=query.type
+    var name=query.name
+    var price=query.price
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type'); // If needed
+  res.setHeader('Access-Control-Allow-Credentials', true);
+    const sql=`insert into masterItems(place,typee,itemName,price) values ('${place}','${type}','${name}','${price}')`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record inserted");
+            let temp={'action':'record-inserted-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    });   
+
+})
 
 
 app.listen(3000)
