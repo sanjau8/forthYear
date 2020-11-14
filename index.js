@@ -411,19 +411,20 @@ app.get("/viewItem",function(req,res){
 
     const sql=`select * from items natural join masterItems where placeId=${place} and stock in ${arr}`;
     con.query(sql, function (err, result) {
+        var items=[]
     if (err) {
         console.log("connection failed"+err.stack)
-        let temp={'action':'data-wrong-format'}
-        res.end(JSON.stringify(temp))
+        
+        res.end(JSON.stringify(items))
             }
         else{
             if(result.length==0){
-                let temp={'action':'no-data-found'}
-                res.end(JSON.stringify(temp))
+                
+                res.end(JSON.stringify(items))
             }
             
             else{
-                var items=[]
+                
                 result.forEach(function(row){
                     var id=row['itemId']
                     var type=row['typee']
@@ -433,8 +434,8 @@ app.get("/viewItem",function(req,res){
                     var tp={'id':id,'type':type,'itemName':itemName,'price':price,'stock':stock}
                     items.push(tp)
                 })
-                let temp={'action':'data-found','items':items}
-                res.end(JSON.stringify(temp))
+             
+                res.end(JSON.stringify(items))
                 }
             }
               
