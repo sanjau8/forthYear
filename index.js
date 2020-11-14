@@ -394,11 +394,14 @@ app.get("/viewItem",function(req,res){
 
     const query=req.query
     var place=query.place
-    var user=query.user
+    var stock=query.stock
 
     var arr=''
-    if(user=='Student'){
+    if(stock=='in'){
         arr="('IN')"
+    }
+    else if(stock=='out'){
+        arr="('OUT')"
     }
     else{
         arr="('IN','OUT')"
