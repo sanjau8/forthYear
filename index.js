@@ -2,10 +2,15 @@ const mysql=require("mysql")
 const express = require('express');
 const app = express()
 
+
+// Prevent Server from Crashing
 process.on('uncaughtException', function (err) {
     console.error(err);
     console.log("Node NOT Exiting...");
   });
+
+
+// SQL Connection
 
 const con=mysql.createConnection({
     host:"crowd.ciiyzqthmod9.us-east-1.rds.amazonaws.com",
@@ -25,6 +30,10 @@ con.connect(function(err){
     console.log("connection successfull")    
     }
 })
+
+
+
+//  Test URL
 app.get("/",function(req,res){
 
     
@@ -43,6 +52,9 @@ app.get("/",function(req,res){
     
 
 })
+
+
+// Student Signup
 
 app.get("/signup",function(req,res){
 
@@ -74,6 +86,8 @@ app.get("/signup",function(req,res){
     
 
 })
+
+// Student Login
 
 app.get("/login",function(req,res){
 
@@ -118,6 +132,8 @@ app.get("/login",function(req,res){
     
 
 })
+
+// visit in and out
 
 app.get("/visit",function(req,res){
 
@@ -180,6 +196,8 @@ app.get("/visit",function(req,res){
 
 })
 
+//get current crowd
+
 app.get("/curByPlace",function(req,res){
     const query=req.query
     
@@ -207,6 +225,7 @@ app.get("/curByPlace",function(req,res){
     
 })
 
+//Insert item by admin to masterItem
 app.get("/itemInsert",function(req,res){
 
     const query=req.query
@@ -235,6 +254,196 @@ app.get("/itemInsert",function(req,res){
     });   
 
 })
+
+
+
+
+// Auto Fill
+
+app.get("/autoFill",function(req,res){
+
+    const query=req.query
+    var place=query.place
+    var text=query.text
+    text=text.toLowerCase();
+    var items=[];
+
+    const sql=`select * from masterItems where place='${place}' and lower(itemName) like '%${text}%' `;
+    con.query(sql, function (err, result) {
+        
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+        
+            }
+        else{
+            if(result.length==0){
+                let temp={'action':'no-data-found'}
+                res.end(JSON.stringify(temp))
+            }
+            else{
+            result.forEach(function(row){
+                var id=row['itemId']
+                var type=row['typee']
+                var itemName=row['itemName']
+                var price=row['price']
+                var tp={'id':id,'type':type,'itemName':itemName,'price':price}
+                items.push(tp)
+            })
+            let temp={'action':'data-found','items':items}
+            res.end(JSON.stringify(temp))
+            }
+
+            }
+              
+        
+    });   
+
+
+
+})
+
+
+// Add item
+
+app.get("/addItem",function(req,res){
+
+    const query=req.query
+    var place=query.place
+    var item=query.item
+
+    const sql=`insert into items values (${place},${item},'IN')`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record inserted");
+            let temp={'action':'record-inserted-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    }); 
+
+
+})
+
+// Remove item
+
+app.get("/removeItem",function(req,res){
+
+    const query=req.query
+    var place=query.place
+    var item=query.item
+
+    const sql=`delete from items where placeId=${place} and itemId=${item}`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record removed");
+            let temp={'action':'record-deleted-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    }); 
+
+
+})
+
+// Update Stock
+
+app.get("/changeStockItem",function(req,res){
+
+    const query=req.query
+    var place=query.place
+    var item=query.item
+    var stock=query.stock
+
+    const sql=`update items set stock='${stock}' where placeId=${place} and itemId=${item}`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            console.log("1 record changed");
+            let temp={'action':'record-changed-successfully'}
+            res.end(JSON.stringify(temp))
+            }
+              
+        
+    }); 
+
+
+})
+
+
+
+
+// view items
+
+
+app.get("/viewItem",function(req,res){
+
+    const query=req.query
+    var place=query.place
+    var user=query.user
+
+    var arr=''
+    if(user=='Student'){
+        arr="('IN')"
+    }
+    else{
+        arr="('IN','OUT')"
+    }
+
+    
+
+    const sql=`select * from items natural join masterItems where placeId=${place} and stock in ${arr}`;
+    con.query(sql, function (err, result) {
+    if (err) {
+        console.log("connection failed"+err.stack)
+        let temp={'action':'data-wrong-format'}
+        res.end(JSON.stringify(temp))
+            }
+        else{
+            if(result.length==0){
+                let temp={'action':'no-data-found'}
+                res.end(JSON.stringify(temp))
+            }
+            
+            else{
+                var items=[]
+                result.forEach(function(row){
+                    var id=row['itemId']
+                    var type=row['typee']
+                    var itemName=row['itemName']
+                    var price=row['price']
+                    var stock=row['stock']
+                    var tp={'id':id,'type':type,'itemName':itemName,'price':price,'stock':stock}
+                    items.push(tp)
+                })
+                let temp={'action':'data-found','items':items}
+                res.end(JSON.stringify(temp))
+                }
+            }
+              
+        
+    }); 
+
+
+})
+
 
 
 app.listen(3000)
