@@ -266,21 +266,19 @@ app.get("/autoFill",function(req,res){
     var place=query.place
     var text=query.text
     text=text.toLowerCase();
-    var items=[];
+    
 
     const sql=`select * from masterItems where place='${place}' and lower(itemName) like '%${text}%' `;
     con.query(sql, function (err, result) {
-        
+        var items=[];
     if (err) {
         console.log("connection failed"+err.stack)
-        let temp={'action':'data-wrong-format'}
-        res.end(JSON.stringify(temp))
+        res.end(JSON.stringify(items))
         
             }
         else{
             if(result.length==0){
-                let temp={'action':'no-data-found'}
-                res.end(JSON.stringify(temp))
+                res.end(JSON.stringify(items))
             }
             else{
             result.forEach(function(row){
@@ -291,8 +289,7 @@ app.get("/autoFill",function(req,res){
                 var tp={'id':id,'type':type,'itemName':itemName,'price':price}
                 items.push(tp)
             })
-            let temp={'action':'data-found','items':items}
-            res.end(JSON.stringify(temp))
+            res.end(JSON.stringify(items))
             }
 
             }
