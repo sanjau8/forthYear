@@ -457,7 +457,7 @@ app.get("/viewslots",function(req,res){
     if (err) {
         console.log("connection failed"+err.stack)
         
-        res.end({"status":"failure"})
+        res.end({})
             }
         else{
             if(result.length!=0){
@@ -470,7 +470,7 @@ app.get("/viewslots",function(req,res){
                 
                 
                 }
-                res.end(JSON.stringify({"status":"success","times":Array.from(times)}))
+                res.end(JSON.stringify(Array.from(times)))
             }
               
         
