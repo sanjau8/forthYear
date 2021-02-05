@@ -292,13 +292,9 @@ app.get("/autoFill",function(req,res){
             res.end(JSON.stringify(items))
             }
 
-            }
-              
+            }              
         
     });   
-
-
-
 })
 
 
@@ -445,6 +441,114 @@ app.get("/viewItem",function(req,res){
 
 })
 
+app.get("/viewslots",function(req,res){
+
+    var query=req.query;
+    var date=query["date"]
+    var time=query["time"]
+
+    const sql=`(select time(slot) as tim from bookings where date(slot)="${date}" group by time(slot) having count(*)=4 union select tim from times where tim<time("${time}"))  order by tim ;
+    `;
+
+
+    con.query(sql, function (err, result) {
+        var times=new Set(["10:00:00","11:00:00","12:00:00","13:00:00","14:00:00","15:00:00","16:00:00","17:00:00","18:00:00","19:00:00"])
+        
+    if (err) {
+        console.log("connection failed"+err.stack)
+        
+        res.end({"status":"failure"})
+            }
+        else{
+            if(result.length!=0){
+                
+                result.forEach(function(row){
+                    
+                    times.delete(row["tim"])
+                   
+                })
+                
+                
+                }
+                res.end(JSON.stringify({"status":"success","times":Array.from(times)}))
+            }
+              
+        
+    }); 
+
+})
+
+
+app.get("/book",function(req,res){
+    var query=req.query
+    var roll=query.roll
+    var place=query.place
+    var date=query.date
+    var time=query.time
+
+    const sql=`insert into bookings values ("${roll}","${place}",timestamp("${date}","${time}"))`;
+
+    con.query(sql, function (err, result) {
+        if (err) {
+            console.log("connection failed"+err.stack)
+            let temp={'action':'data-wrong-format'}
+            res.end(JSON.stringify(temp))
+                }
+            else{
+                console.log("1 record inserted");
+                let temp={'action':'record-inserted-successfully'}
+                res.end(JSON.stringify(temp))
+                }
+                  
+            
+        }); 
+
+
+
+})
+
+app.get("/viewbook",function(req,res){
+    var query=req.query
+    var place=query.place
+    var date=query.date
+
+
+    const sql=`select rollNo,date(slot) as date, time(slot) as time, namee,phoneNo from bookings NATURAL JOIN users where placeid=${place} and date(slot)="${date}" order by slot`;
+    con.query(sql, function (err, result) {
+        var bookings=[]
+    if (err) {
+        console.log("connection failed"+err.stack)
+        
+        res.end(JSON.stringify(bookings))
+            }
+        else{
+            if(result.length==0){
+                
+                res.end(JSON.stringify(bookings))
+            }
+            
+            else{
+                
+                result.forEach(function(row){
+                    var roll=row['rollNo']
+                    
+                    var name=row['namee']
+                    var phone=row['phoneno']
+                    var time=row['time']
+                    var tp={'roll':roll,'date':date,'time':time,'name':name,'phone':phone}
+                    bookings.push(tp)
+                })
+             
+                res.end(JSON.stringify(bookings))
+                }
+            }
+              
+        
+    }); 
+
+
+
+})
 
 
 app.listen(3000)
