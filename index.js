@@ -470,7 +470,12 @@ app.get("/viewslots",function(req,res){
                 
                 
                 }
-                res.end(JSON.stringify(Array.from(times)))
+
+                var result=[]
+                Array.from(times).forEach(function(time){
+                    result.push({"time":time})
+                })
+                res.end(JSON.stringify(result))
             }
               
         
